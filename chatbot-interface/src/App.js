@@ -13,6 +13,9 @@ import {
 import SendIcon from '@mui/icons-material/Send';
 import AttachFileIcon from '@mui/icons-material/AttachFile';
 
+import axios from 'axios'
+
+
 const theme = createTheme({
   palette: {
     primary: {
@@ -31,16 +34,28 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (input.trim() !== "") {
       setMessages([...messages, { text: input, sender: 'user' }]);
       setInput("");
-      setTimeout(() => {
+
+      try {
+        const response = await axios.get('http://localhost:8000/api/v1/zoomBot', {
+          params: { question: input }
+        });
+
+        const botMessage = response.data.status;
+        console.log(botMessage);
+
         setMessages(prevMessages => [
           ...prevMessages,
-          { text: "This is a bot response.", sender: 'bot' }
+          { text: botMessage, sender: 'bot' }
         ]);
-      }, 1000);
+
+      } catch (error) {
+        console.error("Error receiving bot response:", error);
+      }
+
     }
   };
 
